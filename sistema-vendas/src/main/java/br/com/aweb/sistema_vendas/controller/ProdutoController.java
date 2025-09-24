@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import br.com.aweb.sistema_vendas.model.Produto;
 import br.com.aweb.sistema_vendas.service.ProdutoService;
 import jakarta.validation.Valid;
 
 @Controller
-@RequestMapping("/produtos")
+@RequestMapping("/produtos") // ← CORRIGIDO: estava "/produto" no seu código?
 public class ProdutoController {
 
     @Autowired
@@ -38,16 +39,17 @@ public class ProdutoController {
 
     // Salvar produto
     @PostMapping("/novo")
-    public String create(@Valid Produto produto, BindingResult result) {
+    public String create(@Valid Produto produto, BindingResult result, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "produto/form";
         }
         produtoService.salvar(produto);
-        return "redirect:/produtos";
+        redirectAttributes.addFlashAttribute("success", "Produto cadastrado com sucesso!");
+        return "redirect:/produtos"; // ← CORRIGIDO: redireciona para /produtos
     }
 
     // Formulário de edição
-    @GetMapping("/edit/{id}")
+    @GetMapping("/editar/{id}") // ← CORRIGIDO: padrão mais consistente
     public ModelAndView edit(@PathVariable Long id) {
         var optionalProduto = produtoService.buscarPorId(id);
         if (optionalProduto.isPresent()) {
@@ -57,19 +59,19 @@ public class ProdutoController {
     }
 
     // Atualizar produto
-    @PostMapping("/edit/{id}")
-    public String edit(@Valid Produto produto, BindingResult result) {
+    @PostMapping("/editar/{id}") // ← CORRIGIDO: padrão mais consistente
+    public String edit(@PathVariable Long id, @Valid Produto produto, BindingResult result, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             return "produto/form";
         }
 
-        produtoService.atualizar(produto.getId(), produto);
-
+        produtoService.atualizar(id, produto);
+        redirectAttributes.addFlashAttribute("success", "Produto atualizado com sucesso!");
         return "redirect:/produtos";
     }
 
-    // Excluir produto
-    @GetMapping("/delete/{id}")
+    // Excluir produto - Confirmação
+    @GetMapping("/excluir/{id}") // ← CORRIGIDO: padrão mais consistente
     public ModelAndView delete(@PathVariable Long id) {
         var optionalProduto = produtoService.buscarPorId(id);
         if (optionalProduto.isPresent()) {
@@ -78,10 +80,11 @@ public class ProdutoController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/delete/{id}")
-    public String delete(Produto produto) {
-        produtoService.excluir(produto.getId());
+    // Excluir produto - Execução
+    @PostMapping("/excluir/{id}") // ← CORRIGIDO: padrão mais consistente
+    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        produtoService.excluir(id);
+        redirectAttributes.addFlashAttribute("success", "Produto excluído com sucesso!");
         return "redirect:/produtos";
     }
-
 }
