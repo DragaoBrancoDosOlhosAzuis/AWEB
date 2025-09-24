@@ -1,11 +1,9 @@
-package br.com.aweb.sistema_vendas.Repository;
-
-import java.util.List;
+package br.com.aweb.sistema_vendas.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import br.com.aweb.sistema_vendas.Entity.Produto;
+import br.com.aweb.sistema_vendas.model.Produto;
 
-public class ProdutoRepository {
-    List <Produto> finProdutos
+public interface ProdutoRepository extends JpaRepository<Produto, Long>{
+    
 }
